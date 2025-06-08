@@ -11,6 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
+        /* Configuração Base com Fontes e Efeitos */
         body {
             font-family: 'Russo One', sans-serif;
             background-color: #000;
@@ -109,7 +110,7 @@
         }
         .hidden-text::selection { color: white; background: #333; }
         
-        /* Estilos do Modal */
+        /* Estilos do Modal Konami */
         #konami-wrapper { 
             display: none; 
             position: fixed; 
@@ -124,6 +125,26 @@
         .konami-active #konami-wrapper { 
             display: flex; 
         }
+        /* Animação para o modal */
+        @keyframes fadeInZoom {
+            from { opacity: 0; transform: scale(0.5); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .konami-active #konami-modal-content {
+            animation: fadeInZoom 0.5s ease-out forwards;
+        }
+
+        /* Pista do Konami Code */
+        .konami-hint {
+            position: absolute;
+            font-size: 1.5rem;
+            color: rgba(255, 255, 255, 0.1);
+            transition: color 0.2s, text-shadow 0.2s;
+        }
+        .konami-hint.key-glow {
+            color: rgba(255, 255, 255, 0.8);
+            text-shadow: 0 0 8px rgba(255, 255, 255, 0.8);
+        }
 
     </style>
 </head>
@@ -131,9 +152,7 @@
 
     <!-- Konami Code Modal Wrapper -->
     <div id="konami-wrapper">
-        <!-- Backdrop -->
         <div class="absolute inset-0 bg-black/90 backdrop-blur-sm"></div>
-        <!-- Modal Content -->
         <div id="konami-modal-content" class="relative bg-white text-black border-2 border-black p-8 text-center">
             <pre id="konami-ascii" class="font-mono text-lg"></pre>
             <p class="font-russo mt-4">Powered by Ik1.</p>
@@ -141,14 +160,16 @@
     </div>
 
 
-    <!-- Navegação -->
+    <!-- Responsividade pra navegar -->
     <header class="fixed top-0 left-0 w-full bg-black/80 backdrop-blur-sm z-40 border-b border-gray-800">
         <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
-                <div class="flex items-center">
-                    <span class="flex items-center text-white text-xl font-bold text-shadow-glow"> $_> System@LASETE--  </span>
-                    <img src="public/LASETE.svg" width="20">
+                <!-- Logo -->
+                <div class="flex-shrink-0 flex items-center">
+                    <span class="text-white text-xl font-bold text-shadow-glow"> $_> System@LASETE--  </span>
+                    <img src="public/LASETE.svg" width="20" class="ml-2">
                 </div>
+                <!-- Menu desktop -->
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
                         <button onclick="scrollToSection('quem-somos')" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:text-shadow-glow">./quem_somos</button>
@@ -156,22 +177,45 @@
                         <button onclick="scrollToSection('ideais')" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:text-shadow-glow">./ideais</button>
                     </div>
                 </div>
+                <!-- Botão menu mobile -->
+                <div class="-mr-2 flex md:hidden">
+                    <button id="mobile-menu-button" type="button" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white focus:outline-none">
+                        <span class="sr-only">Abrir menu principal</span>
+                        <svg id="hamburger-icon" class="block h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
+                        <svg id="close-icon" class="hidden h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                </div>
             </div>
         </nav>
+        <!-- Painel Menu Mobile -->
+        <div class="hidden md:hidden" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button onclick="scrollToSectionAndCloseMenu('quem-somos')" class="text-gray-300 hover:text-white block w-full text-left px-3 py-2 rounded-md text-base font-medium">./quem_somos</button>
+                <button onclick="scrollToSectionAndCloseMenu('projetos')" class="text-gray-300 hover:text-white block w-full text-left px-3 py-2 rounded-md text-base font-medium">./projetos</button>
+                <button onclick="scrollToSectionAndCloseMenu('ideais')" class="text-gray-300 hover:text-white block w-full text-left px-3 py-2 rounded-md text-base font-medium">./ideais</button>
+            </div>
+        </div>
     </header>
 
     <main class="pt-16">
         <div class="min-h-screen flex flex-col items-center justify-center text-center px-4">
-            <div class="w-64 h-80 md:w-72 md:h-96 box-shadow-glow float-animation mb-8 overflow-hidden">
+            <div class="w-48 h-64 sm:w-64 sm:h-80 md:w-72 md:h-96 box-shadow-glow float-animation mb-8 overflow-hidden">
                 <img src="public/LASETE HACKER.png" alt="Imagem LASETE" class="w-full h-full object-cover">
             </div>
-            <h1 id="logo" class="text-7xl md:text-8xl lg:text-9xl font-black tracking-wider cursor-pointer transition-all duration-300 float-animation text-white text-shadow-glow" >LASETE</h1>
-            <p id="typewriter-hero" class="text-2xl md:text-3xl text-gray-400 mt-4 h-10"></p>
+            <div class="relative inline-block">
+                <h1 id="logo" class="text-6xl sm:text-7xl md:text-8xl lg:text-9xl font-black tracking-wider cursor-pointer transition-all duration-300 float-animation text-white text-shadow-glow" >LASETE</h1>
+                <!-- Pistas do Konami Code -->
+                <span id="hint-up" class="konami-hint" style="top: -2rem; left: 50%; transform: translateX(-50%);">▲</span>
+                <span id="hint-down" class="konami-hint" style="bottom: -2rem; left: 50%; transform: translateX(-50%);">▼</span>
+                <span id="hint-left" class="konami-hint" style="left: -3rem; top: 50%; transform: translateY(-50%);">◄</span>
+                <span id="hint-right" class="konami-hint" style="right: -3rem; top: 50%; transform: translateY(-50%);">►</span>
+            </div>
+            <p id="typewriter-hero" class="text-xl sm:text-2xl md:text-3xl text-gray-400 mt-4 h-10"></p>
         </div>
 
         <section id="quem-somos" class="w-full py-20 px-4 md:px-8 lg:px-16">
             <div class="max-w-4xl mx-auto selectable">
-                <h2 class="text-4xl md:text-5xl font-bold text-white text-shadow-glow mb-8 h-14" id="typewriter-quem-somos"></h2>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-shadow-glow mb-8 h-14" id="typewriter-quem-somos"></h2>
                 <div class="text-gray-300 text-lg space-y-4 leading-relaxed font-mono">
                     <p>[Iniciando protocolo de identificação...]<br>Nós somos a LASETE. Emergimos do ruído digital, um coletivo de arquitetos da informação, engenheiros do caos e filósofos do código. Não nos definimos por nomes ou rostos, mas pela nossa obra e pelo impacto que causamos nas estruturas de poder e conhecimento. Operamos nas sombras da rede, onde a informação flui livre e sem amarras. Nossa missão é desafiar o status quo, quebrar as barreiras digitais e expor a verdade que se esconde por trás das firewalls da complacência.</p>
                     <div class="w-full h-48 bg-gray-900 border-2 border-dashed border-gray-700 mt-8 flex items-center justify-center box-shadow-glow"><span class="font-mono text-gray-500">// Espaço pra gente botar imagem</span></div>
@@ -182,7 +226,7 @@
         
         <section id="projetos" class="w-full py-20 px-4 md:px-8 lg:px-16">
             <div class="max-w-4xl mx-auto selectable">
-                <h2 class="text-4xl md:text-5xl font-bold text-white text-shadow-glow mb-8 h-14" id="typewriter-projetos"></h2>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-shadow-glow mb-8 h-14" id="typewriter-projetos"></h2>
                 <div class="text-gray-300 text-lg space-y-4 leading-relaxed font-mono">
                      <p>[Acessando arquivos de projetos...]<br>Nossas operações são multifacetadas, abrangendo desde a auditoria de segurança de sistemas considerados impenetráveis até a criação de plataformas de comunicação descentralizadas e anônimas. Cada projeto é um passo em direção a um futuro mais transparente e equitativo.</p>
                     <ul class="list-none mt-4 space-y-3">
@@ -200,7 +244,7 @@
         
         <section id="ideais" class="w-full py-20 px-4 md:px-8 lg:px-16">
             <div class="max-w-4xl mx-auto selectable">
-                 <h2 class="text-4xl md:text-5xl font-bold text-white text-shadow-glow mb-8 h-14" id="typewriter-ideais"></h2>
+                 <h2 class="text-3xl sm:text-4xl md:text-5xl font-bold text-white text-shadow-glow mb-8 h-14" id="typewriter-ideais"></h2>
                  <div class="text-gray-300 text-lg space-y-4 leading-relaxed font-mono">
                     <p>[Carregando manifesto...]<br>Acreditamos em um conjunto fundamental de princípios que guiam todas as nossas ações. São eles os pilares da nossa existência digital.</p>
                     <blockquote class="border-l-4 border-gray-500 pl-4 my-6 italic">"A informação quer ser livre. Qualquer tentativa de aprisioná-la é um ato de tirania contra a mente humana."</blockquote>
@@ -240,7 +284,6 @@
     </footer>
     
     <script>
-        // Lógica de Typewriter
         function typeWriter(element, text, speed, onComplete = () => {}) {
             let i = 0;
             element.innerHTML = "";
@@ -257,14 +300,32 @@
             }, speed);
         }
 
-        // Função de Scroll Suave
         function scrollToSection(id) {
             document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
         }
+        
+        function scrollToSectionAndCloseMenu(id) {
+            scrollToSection(id);
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            const closeIcon = document.getElementById('close-icon');
+            mobileMenu.classList.add('hidden');
+            hamburgerIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+        }
 
-        // Lógica dos Easter Eggs e Animações
         document.addEventListener('DOMContentLoaded', () => {
-            // --- Console com um oi ---
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const hamburgerIcon = document.getElementById('hamburger-icon');
+            const closeIcon = document.getElementById('close-icon');
+
+            mobileMenuButton.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+                hamburgerIcon.classList.toggle('hidden');
+                closeIcon.classList.toggle('hidden');
+            });
+
             const hour = new Date().getHours();
             let greeting = "Olá, agente.";
             if (hour < 5) { greeting = "Bela madrugada, agente."; }
@@ -290,11 +351,9 @@ ${greeting}
 System Initialized. // Você não está sozinho.
             `);
             
-            // Iniciar typewriter principal
             const heroTypewriterEl = document.getElementById('typewriter-hero');
             typeWriter(heroTypewriterEl, 'Mais que uma Liga. Somos um Ideal.', 70);
 
-            // Animação de typewriter para títulos de seção ao rolar
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
@@ -313,8 +372,6 @@ System Initialized. // Você não está sozinho.
                 observer.observe(section);
             });
 
-
-            // --- Glitch na logo ---
             const logo = document.getElementById('logo');
             let logoClicks = 0;
             logo.addEventListener('click', () => {
@@ -328,7 +385,6 @@ System Initialized. // Você não está sozinho.
                 }
             });
 
-            // --- Mensagem do Rodapé ---
             const footerMessageEl = document.getElementById('footer-message');
             let footerClicks = 0;
             footerMessageEl.addEventListener('click', () => {
@@ -342,12 +398,20 @@ System Initialized. // Você não está sozinho.
                     footerMessageEl.textContent = "// Nada mais a ser visto aqui... ou será que tem?";
                 }
             });
-
-            // --- konami code ---
+            
+            // Konami Code Logic
             const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
             let userSequence = [];
+            const konamiWrapper = document.getElementById('konami-wrapper');
+            const hints = {
+                ArrowUp: document.getElementById('hint-up'),
+                ArrowDown: document.getElementById('hint-down'),
+                ArrowLeft: document.getElementById('hint-left'),
+                ArrowRight: document.getElementById('hint-right')
+            };
+
             document.getElementById('konami-ascii').textContent = String.raw`
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀
+            ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀
 ⠀⠀⠀⡠⢺⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢢⠀⠀⠀⠀
 ⠀⠀⣰⠁⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⢳⠀⠀⠀
 ⠀⢠⡇⠀⢸⠀⠀⠀⠀⢀⣀⣀⣀⣀⣀⣀⣀⠀⠀⠀⠀⠈⠀⠀⡇⠀⠀
@@ -365,7 +429,7 @@ System Initialized. // Você não está sozinho.
 ⠀⠀⠀⠀⠀⠀⠈⢿⣧⠘⢜⣉⣁⣈⣉⣏⠄⢰⣿⠃⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠈⢿⡀⠀⠐⠒⠒⠒⠀⠀⣼⠃⠀⠀⠀⠀⠀⠀⠀⠀
 ⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⢤⣀⣀⣀⣀⣠⠜⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀
-⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⣉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⣉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀
 .____       _____    __________________________________________
 |    |     /  _  \  /   _____/\_   _____/\__    ___/\_   _____/
 |    |    /  /_\  \ \_____  \  |    __)_   |    |    |    __)_ 
@@ -373,24 +437,36 @@ System Initialized. // Você não está sozinho.
 |_______ \____|__  /_______  //_______  /  |____|   /_______  /
         \/       \/        \/         \/                    \/ 
             `;
-            const konamiWrapper = document.getElementById('konami-wrapper');
+            
             window.addEventListener('keydown', (e) => {
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(e.key)) {
+                    e.preventDefault();
+                }
                 userSequence.push(e.key);
+                
+                // Hint logic
+                if (hints[e.key]) {
+                    hints[e.key].classList.add('key-glow');
+                    setTimeout(() => {
+                        hints[e.key].classList.remove('key-glow');
+                    }, 200);
+                }
+
                 if (userSequence.length > konamiSequence.length) {
                     userSequence.shift();
                 }
+
                 if (JSON.stringify(userSequence) === JSON.stringify(konamiSequence)) {
                     document.body.classList.add('konami-active');
-                    konamiWrapper.style.display = 'flex'; // Torna o wrapper visível
+                    konamiWrapper.style.display = 'flex';
                     setTimeout(() => {
                         document.body.classList.remove('konami-active');
-                        konamiWrapper.style.display = 'none'; // Esconde o wrapper
+                        konamiWrapper.style.display = 'none';
                         userSequence = [];
                     }, 10000);
                 }
             });
 
-            // --- Mudança de titulo ---
             let originalTitle = document.title;
             window.addEventListener('blur', () => {
                 document.title = "Volte... estamos à sua espera.";
@@ -398,26 +474,24 @@ System Initialized. // Você não está sozinho.
             window.addEventListener('focus', () => {
                 document.title = originalTitle;
             });
-        });
-
-        // --- dev tools ---
-        const devtools = /./;
-        devtools.toString = function() {
-            this.opened = true;
-        }
-
-        console.log('%c', devtools);
-        setInterval(() => {
-            if (devtools.opened) {
-                console.warn('Estou vendo você buscando, continue... A essência é buscar.');
-                devtools.opened = false; 
+            
+            const devtools = /./;
+            devtools.toString = function() {
+                this.opened = true;
             }
-        }, 1000);
-        // --- easter egg do hifen ---
-        const voidTrigger = document.getElementById('void-trigger');
-        voidTrigger.addEventListener('click', () => {
-        console.log('Você olhou para o abismo, e o abismo olhou de volta.');
-});
+            console.log('%c', devtools);
+            setInterval(() => {
+                if (devtools.opened) {
+                    console.warn('Estou vendo você buscando, continue... A essência é buscar.');
+                    devtools.opened = false; 
+                }
+            }, 1000);
+
+            const voidTrigger = document.getElementById('void-trigger');
+            voidTrigger.addEventListener('click', () => {
+                console.log('Você olhou para o abismo, e o abismo olhou de volta.');
+            });
+        });
     </script>
 </body>
 </html>
