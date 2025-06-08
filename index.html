@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LASETE</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="icon" type="image/x-icon" href="public/LASETE.svg">
+    <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Roboto+Mono:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Russo One', sans-serif;
+            background-color: #000;
+            color: #fff;
+            overflow-x: hidden;
+            user-select: none;
+        }
+
+        .selectable, .selectable p, .selectable blockquote, .selectable li {
+            user-select: text;
+        }
+
+        .font-russo { font-family: 'Russo One', sans-serif; }
+        .font-mono { font-family: 'Roboto Mono', monospace; }
+
+        /* Efeito scan */
+        body::after {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: repeating-linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3) 1px, transparent 1px, transparent 2px);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        /* Efeitos de Glow */
+        .text-shadow-glow { text-shadow: 0 0 10px rgba(255, 255, 255, 0.7), 0 0 12px rgba(255, 255, 255, 0.5); }
+        .box-shadow-glow { 
+            box-shadow: 0 0 15px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.08);
+            animation: pulse-glow 3s infinite alternate;
+        }
+
+        @keyframes pulse-glow {
+            from { box-shadow: 0 0 15px rgba(255, 255, 255, 0.1), 0 0 20px rgba(255, 255, 255, 0.08); }
+            to { box-shadow: 0 0 25px rgba(255, 255, 255, 0.2), 0 0 30px rgba(255, 255, 255, 0.15); }
+        }
+
+        /* Animação de digitação */
+        .blinking-cursor::after {
+            content: '_';
+            animation: blink 1s step-end infinite;
+        }
+        @keyframes blink { 50% { opacity: 0; } }
+
+        /* Animação de flutuação */
+        .float-animation { animation: float 6s ease-in-out infinite; }
+        @keyframes float { 
+            0% { transform: translateY(0px); } 
+            50% { transform: translateY(-10px); } 
+            100% { transform: translateY(0px); } 
+        }
+
+        /* Efeito de Glitch no Logo */
+        .glitch { animation: glitch-animation 0.5s infinite; position: relative; }
+        @keyframes glitch-animation {
+            0% { transform: translate(0); } 20% { transform: translate(-3px, 3px); } 40% { transform: translate(-3px, -3px); }
+            60% { transform: translate(3px, 3px); } 80% { transform: translate(3px, -3px); } 100% { transform: translate(0); }
+        }
+        
+        /* Efeito de Glitch no Texto (hover) */
+        .glitch-text {
+            position: relative;
+            display: inline-block;
+        }
+        .glitch-text:hover::before, .glitch-text:hover::after {
+            content: attr(data-text); 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%;
+            background: #000;
+            overflow: hidden;
+            color: #fff;
+        }
+        .glitch-text:hover::before {
+            left: 2px;
+            text-shadow: -2px 0 #00f;
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+        .glitch-text:hover::after {
+            left: -2px;
+            text-shadow: -2px 0 #f00;
+            animation: glitch-anim-2 2s infinite linear alternate-reverse;
+        }
+        @keyframes glitch-anim-1 { 0% { clip-path: polygon(0 2%, 100% 2%, 100% 5%, 0 5%); } 100% { clip-path: polygon(0 80%, 100% 80%, 100% 85%, 0 85%); } }
+        @keyframes glitch-anim-2 { 0% { clip-path: polygon(0 50%, 100% 50%, 100% 55%, 0 55%); } 100% { clip-path: polygon(0 20%, 100% 20%, 100% 25%, 0 25%); } }
+
+        /* Easter Eggs */
+        .hidden-text {
+            user-select: text;
+        }
+        .hidden-text::selection { color: white; background: #333; }
+        
+        /* Estilos do Modal */
+        #konami-wrapper { 
+            display: none; 
+            position: fixed; 
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 50;
+            align-items: center;
+            justify-content: center;
+        }
+        .konami-active #konami-wrapper { 
+            display: flex; 
+        }
+
+    </style>
+</head>
+<body class="bg-black text-white">
+
+    <!-- Konami Code Modal Wrapper -->
+    <div id="konami-wrapper">
+        <!-- Backdrop -->
+        <div class="absolute inset-0 bg-black/90 backdrop-blur-sm"></div>
+        <!-- Modal Content -->
+        <div id="konami-modal-content" class="relative bg-white text-black border-2 border-black p-8 text-center">
+            <pre id="konami-ascii" class="font-mono text-lg"></pre>
+            <p class="font-russo mt-4">Powered by Ik1.</p>
+        </div>
+    </div>
+
+
+    <!-- Navegação -->
+    <header class="fixed top-0 left-0 w-full bg-black/80 backdrop-blur-sm z-40 border-b border-gray-800">
+        <nav class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex items-center">
+                    <span class="flex items-center text-white text-xl font-bold text-shadow-glow"> $_> System@LASETE--  </span>
+                    <img src="public/LASETE.svg" width="20">
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <button onclick="scrollToSection('quem-somos')" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:text-shadow-glow">./quem_somos</button>
+                        <button onclick="scrollToSection('projetos')" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:text-shadow-glow">./projetos</button>
+                        <button onclick="scrollToSection('ideais')" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:text-shadow-glow">./ideais</button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="pt-16">
+        <div class="min-h-screen flex flex-col items-center justify-center text-center px-4">
+            <div class="w-64 h-80 md:w-72 md:h-96 box-shadow-glow float-animation mb-8 overflow-hidden">
+                <img src="public/LASETE HACKER.png" alt="Imagem LASETE" class="w-full h-full object-cover">
+            </div>
+            <h1 id="logo" class="text-7xl md:text-8xl lg:text-9xl font-black tracking-wider cursor-pointer transition-all duration-300 float-animation text-white text-shadow-glow" >LASETE</h1>
+            <p id="typewriter-hero" class="text-2xl md:text-3xl text-gray-400 mt-4 h-10"></p>
+        </div>
+
+        <section id="quem-somos" class="w-full py-20 px-4 md:px-8 lg:px-16">
+            <div class="max-w-4xl mx-auto selectable">
+                <h2 class="text-4xl md:text-5xl font-bold text-white text-shadow-glow mb-8 h-14" id="typewriter-quem-somos"></h2>
+                <div class="text-gray-300 text-lg space-y-4 leading-relaxed font-mono">
+                    <p>[Iniciando protocolo de identificação...]<br>Nós somos a LASETE. Emergimos do ruído digital, um coletivo de arquitetos da informação, engenheiros do caos e filósofos do código. Não nos definimos por nomes ou rostos, mas pela nossa obra e pelo impacto que causamos nas estruturas de poder e conhecimento. Operamos nas sombras da rede, onde a informação flui livre e sem amarras. Nossa missão é desafiar o status quo, quebrar as barreiras digitais e expor a verdade que se esconde por trás das firewalls da complacência.</p>
+                    <div class="w-full h-48 bg-gray-900 border-2 border-dashed border-gray-700 mt-8 flex items-center justify-center box-shadow-glow"><span class="font-mono text-gray-500">// Espaço pra gente botar imagem</span></div>
+                    <p class="mt-4">Cada linha de código que escrevemos é um manifesto. Cada sistema que infiltramos é uma declaração de que o conhecimento não pode ser contido. Somos a anomalia na matriz, a porra do ghost in the shell. Existimos para garantir que a tecnologia sirva à liberdade e não ao controle.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="projetos" class="w-full py-20 px-4 md:px-8 lg:px-16">
+            <div class="max-w-4xl mx-auto selectable">
+                <h2 class="text-4xl md:text-5xl font-bold text-white text-shadow-glow mb-8 h-14" id="typewriter-projetos"></h2>
+                <div class="text-gray-300 text-lg space-y-4 leading-relaxed font-mono">
+                     <p>[Acessando arquivos de projetos...]<br>Nossas operações são multifacetadas, abrangendo desde a auditoria de segurança de sistemas considerados impenetráveis até a criação de plataformas de comunicação descentralizadas e anônimas. Cada projeto é um passo em direção a um futuro mais transparente e equitativo.</p>
+                    <ul class="list-none mt-4 space-y-3">
+                        <li><span class="glitch-text text-white font-bold" data-text="Projeto Cerberus:">Projeto Jonas:</span> nada </li>
+                        <li><span class="glitch-text text-white font-bold" data-text="Operação Chronos:">Operação Brothers:</span> nada </li>
+                        <li><span class="glitch-text text-white font-bold" data-text="Rede Nyx:">Cade nossos projetos buaaaa:</span> nada </li>
+                    </ul>
+                    <div class="grid md:grid-cols-2 gap-8 mt-8">
+                        <div class="w-full h-48 bg-gray-900 border-2 border-dashed border-gray-700 flex items-center justify-center box-shadow-glow"><span class="font-mono text-gray-500">// Mais espaço pra imagem</span></div>
+                        <div class="w-full h-48 bg-gray-900 border-2 border-dashed border-gray-700 flex items-center justify-center box-shadow-glow"><span class="font-mono text-gray-500">// Adivinha pra que é esse espaço...</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="ideais" class="w-full py-20 px-4 md:px-8 lg:px-16">
+            <div class="max-w-4xl mx-auto selectable">
+                 <h2 class="text-4xl md:text-5xl font-bold text-white text-shadow-glow mb-8 h-14" id="typewriter-ideais"></h2>
+                 <div class="text-gray-300 text-lg space-y-4 leading-relaxed font-mono">
+                    <p>[Carregando manifesto...]<br>Acreditamos em um conjunto fundamental de princípios que guiam todas as nossas ações. São eles os pilares da nossa existência digital.</p>
+                    <blockquote class="border-l-4 border-gray-500 pl-4 my-6 italic">"A informação quer ser livre. Qualquer tentativa de aprisioná-la é um ato de tirania contra a mente humana."</blockquote>
+                    <p>
+                        Nossos ideais são:<br>
+                        1. <span class="text-white">Transparência Radical:</span> Os sistemas que governam nossas vidas devem ser abertos à inspeção. O segredo é o solo onde a corrupção floresce.<br>
+                        2. <span class="text-white">Soberania Individual:</span> Cada indivíduo é o único dono de seus dados e de sua identidade digital. A privacidade não é uma opção, é um direito inalienável.<br>
+                        3. <span class="text-white">Descentralização do Poder:</span> O poder concentrado é uma ameaça à liberdade. Lutamos por arquiteturas distribuídas e autônomas.<br>
+                        <span class="text-black hidden-text">4. A verdadeira liberdade está no conhecimento que você ousa buscar.</span>
+                    </p>
+                 </div>
+            </div>
+        </section>
+    </main>
+    
+    <footer class="bg-black border-t border-gray-800 py-8 px-4">
+        <div class="max-w-7xl mx-auto text-center text-gray-400">
+            <p id="footer-message" class="font-mono cursor-pointer">// Fim da transmissão.</p>
+            <div class="flex justify-center space-x-6 mt-4">
+                <a href="https://github.com/lasete" class="text-gray-300 hover:text-white transition-all duration-300 hover:text-shadow-glow" >
+                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"></path></svg>
+                </a>
+                <a href="https://www.instagram.com/lasete.undb/" class="text-gray-300 hover:text-white transition-all duration-300 hover:text-shadow-glow">
+                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
+                        <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
+                        <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line>
+                    </svg>
+                </a>
+                 <a href="https://www.linkedin.com/company/lasete" class="text-gray-300 hover:text-white transition-all duration-300 hover:text-shadow-glow">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"></path><rect x="2" y="9" width="4" height="12"></rect><circle cx="4" cy="4" r="2"></circle></svg>
+                </a>
+            </div>
+            <p class="mt-6 text-sm text-gray-600 font-mono">LASETE // Disconnect sequence initiated... 2025</p>
+        </div>
+            <div id="void-trigger" class="absolute right-2 bottom-2 w-2 h-2 cursor-pointer">-</div>
+    </footer>
+    
+    <script>
+        // Lógica de Typewriter
+        function typeWriter(element, text, speed, onComplete = () => {}) {
+            let i = 0;
+            element.innerHTML = "";
+            element.classList.add('blinking-cursor');
+            const interval = setInterval(() => {
+                if (i < text.length) {
+                    element.innerHTML += text.charAt(i);
+                    i++;
+                } else {
+                    clearInterval(interval);
+                    element.classList.remove('blinking-cursor');
+                    onComplete();
+                }
+            }, speed);
+        }
+
+        // Função de Scroll Suave
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Lógica dos Easter Eggs e Animações
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- Console com um oi ---
+            const hour = new Date().getHours();
+            let greeting = "Olá, agente.";
+            if (hour < 5) { greeting = "Bela madrugada, agente."; }
+            else if (hour < 12) { greeting = "Bom dia, agente."; } 
+            else if (hour < 18) { greeting = "Boa tarde, agente."; }
+            else { greeting = "Boa noite, agente."; }
+
+            console.log(String.raw`
+      ___       ___           ___           ___           ___           ___     
+     /\__\     /\  \         /\  \         /\  \         /\  \         /\  \    
+    /:/  /    /::\  \       /::\  \       /::\  \        \:\  \       /::\  \   
+   /:/  /    /:/\:\  \     /:/\ \  \     /:/\:\  \        \:\  \     /:/\:\  \  
+  /:/  /    /::\~\:\  \   _\:\~\ \  \   /::\~\:\  \       /::\  \   /::\~\:\  \ 
+ /:/__/    /:/\:\ \:\__\ /\ \:\ \ \__\ /:/\:\ \:\__\     /:/\:\__\ /:/\:\ \:\__\
+ \:\  \    \/__\:\/:/  / \:\ \:\ \/__/ \:\~\:\ \/__/    /:/  \/__/ \:\~\:\ \/__/
+  \:\  \        \::/  /   \:\ \:\__\    \:\ \:\__\     /:/  /       \:\ \:\__\  
+   \:\  \       /:/  /     \:\/:/  /     \:\ \/__/     \/__/         \:\ \/__/  
+    \:\__\     /:/  /       \::/  /       \:\__\                      \:\__\    
+     \/__/     \/__/         \/__/         \/__/                       \/__/    
+
+---------------------------------------------------------------------------------
+${greeting}
+System Initialized. // Você não está sozinho.
+            `);
+            
+            // Iniciar typewriter principal
+            const heroTypewriterEl = document.getElementById('typewriter-hero');
+            typeWriter(heroTypewriterEl, 'Mais que uma Liga. Somos um Ideal.', 70);
+
+            // Animação de typewriter para títulos de seção ao rolar
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const el = entry.target;
+                        const typewriterEl = document.getElementById(`typewriter-${el.id}`);
+                        if(typewriterEl && typewriterEl.innerHTML === "") {
+                             typeWriter(typewriterEl, `$_> ${el.dataset.title}`, 50);
+                        }
+                        observer.unobserve(el);
+                    }
+                });
+            }, { threshold: 0.5 });
+            
+            document.querySelectorAll('section').forEach(section => {
+                section.dataset.title = section.id.replace('-', ' ');
+                observer.observe(section);
+            });
+
+
+            // --- Glitch na logo ---
+            const logo = document.getElementById('logo');
+            let logoClicks = 0;
+            logo.addEventListener('click', () => {
+                logoClicks++;
+                if (logoClicks > 5) {
+                    logo.classList.add('glitch', 'text-red-500');
+                    setTimeout(() => {
+                        logo.classList.remove('glitch', 'text-red-500');
+                        logoClicks = 0;
+                    }, 500);
+                }
+            });
+
+            // --- Mensagem do Rodapé ---
+            const footerMessageEl = document.getElementById('footer-message');
+            let footerClicks = 0;
+            footerMessageEl.addEventListener('click', () => {
+                footerClicks++;
+                if (footerClicks > 77) {
+                    footerMessageEl.textContent = "// Espero você em: https://...";
+                    footerClicks = 0;
+                }else if(footerClicks > 8) {
+                    footerMessageEl.textContent = "// Reescrevendo o futuro da CyberSec.";
+                } else if (footerClicks > 4) {
+                    footerMessageEl.textContent = "// Nada mais a ser visto aqui... ou será que tem?";
+                }
+            });
+
+            // --- konami code ---
+            const konamiSequence = ['ArrowUp', 'ArrowUp', 'ArrowDown', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowLeft', 'ArrowRight', 'b', 'a'];
+            let userSequence = [];
+            document.getElementById('konami-ascii').textContent = String.raw`
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⡀⠀⠀⠀⠀⠀
+⠀⠀⠀⡠⢺⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⢢⠀⠀⠀⠀
+⠀⠀⣰⠁⢸⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢸⠀⢳⠀⠀⠀
+⠀⢠⡇⠀⢸⠀⠀⠀⠀⢀⣀⣀⣀⣀⣀⣀⣀⠀⠀⠀⠀⠈⠀⠀⡇⠀⠀
+⠀⢸⡄⠀⠀⠢⣠⣴⡋⠉⠁⠀⠀⠀⠀⠀⠈⠻⣶⣄⡠⠃⠀⠀⡇⠀⠀
+⡀⠈⣧⠀⠀⠀⠈⡇⠃⠀⠀⠀⠀⠀⠀⠀⠀⠀⣿⡏⠀⠀⠀⢠⠇⠀⡀
+⣷⡀⠘⣆⠀⠀⠀⣿⠀⠀⠀⠀⠀⢀⣀⣠⡤⢾⣿⡁⠀⠀⢠⡟⠀⣴⡇
+⡏⢻⣦⡘⣷⣦⠼⠃⠀⠀⠀⠀⠀⠀⠀⢀⠀⠀⠻⢷⣤⣴⡏⣠⡾⠃⠃
+⢳⠀⠙⢿⣿⡏⠀⠀⠀⡰⠃⠀⠀⠀⠀⠀⠣⡀⠀⠀⠀⢹⣿⠟⠀⢰⠀
+⠈⢧⡀⢸⣿⣿⣀⡀⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀⠁⣀⠀⠈⣿⠀⢀⠌⠀
+⠀⠀⠙⢾⣿⣿⣿⣿⡗⢄⡀⠀⡀⠀⡀⠀⡀⠔⡿⠀⠀⠀⣿⠔⠁⠀⠀
+⠀⠀⠀⠀⢿⣿⡋⠉⠙⠒⠉⠙⡇⢀⡟⠉⠑⠊⠁⠀⠀⢠⠇⠀⠀⠀⠀
+⠀⠀⠀⠀⠈⠻⡇⠀⠀⠀⢀⠀⠃⢸⣷⣀⠀⠀⠀⢀⡴⠃⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⣿⣶⣶⣖⠛⠦⠀⠈⡿⠟⢑⣶⣶⣾⠇⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⢻⣯⠉⢩⠧⠄⠓⠒⠁⣔⢵⠈⣡⣿⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠈⢿⣧⠘⢜⣉⣁⣈⣉⣏⠄⢰⣿⠃⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠈⢿⡀⠀⠐⠒⠒⠒⠀⠀⣼⠃⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠑⢤⣀⣀⣀⣀⣠⠜⠁⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠈⠉⣉⠉⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+.____       _____    __________________________________________
+|    |     /  _  \  /   _____/\_   _____/\__    ___/\_   _____/
+|    |    /  /_\  \ \_____  \  |    __)_   |    |    |    __)_ 
+|    |___/    |    \/        \ |        \  |    |    |        \
+|_______ \____|__  /_______  //_______  /  |____|   /_______  /
+        \/       \/        \/         \/                    \/ 
+            `;
+            const konamiWrapper = document.getElementById('konami-wrapper');
+            window.addEventListener('keydown', (e) => {
+                userSequence.push(e.key);
+                if (userSequence.length > konamiSequence.length) {
+                    userSequence.shift();
+                }
+                if (JSON.stringify(userSequence) === JSON.stringify(konamiSequence)) {
+                    document.body.classList.add('konami-active');
+                    konamiWrapper.style.display = 'flex'; // Torna o wrapper visível
+                    setTimeout(() => {
+                        document.body.classList.remove('konami-active');
+                        konamiWrapper.style.display = 'none'; // Esconde o wrapper
+                        userSequence = [];
+                    }, 10000);
+                }
+            });
+
+            // --- Mudança de titulo ---
+            let originalTitle = document.title;
+            window.addEventListener('blur', () => {
+                document.title = "Volte... estamos à sua espera.";
+            });
+            window.addEventListener('focus', () => {
+                document.title = originalTitle;
+            });
+        });
+
+        // --- dev tools ---
+        const devtools = /./;
+        devtools.toString = function() {
+            this.opened = true;
+        }
+
+        console.log('%c', devtools);
+        setInterval(() => {
+            if (devtools.opened) {
+                console.warn('Estou vendo você buscando, continue... A essência é buscar.');
+                devtools.opened = false; 
+            }
+        }, 1000);
+        // --- easter egg do hifen ---
+        const voidTrigger = document.getElementById('void-trigger');
+        voidTrigger.addEventListener('click', () => {
+        console.log('Você olhou para o abismo, e o abismo olhou de volta.');
+});
+    </script>
+</body>
+</html>
